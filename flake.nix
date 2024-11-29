@@ -3,46 +3,32 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
   };
 
   outputs = {
     self,
     nixpkgs,
-    flake-utils,
     ...
-  }:
-    flake-utils.lib.eachDefaultSystem (
+  }: let
+    forAllSystems = function:
+      nixpkgs.lib.genAttrs [
+        "x86_64-linux"
+      ] (system: function nixpkgs.legacyPackages.${system});
+  in {
+            packages = forAllSystems(
+                pkgs: {
+                    default = pkgs.callPackage ./package.nix {};
+                }
+            )
+    /*
+       flake-utils.lib.eachDefaultSystem (
       system: let
         pkgs = import nixpkgs {inherit system;};
-        bi = with pkgs; [
-        ];
-
-        nbi = with pkgs; [
-          python3
-        ];
-
-        python_script = pkgs.python3Packages.buildPythonApplication {
-          pname = "webspeeddial";
-          version = "1.0";
-
-          nativeBuildInputs = nbi;
-
-          src = ./.;
-
-          installPhase = ''
-            mkdir -p $out/bin
-            cp ${./main.py} $out/bin/webspeeddial
-            chmod +x $out/bin/webspeeddial
-          '';
-        };
       in {
         packages.default = python_script;
 
-        devShell = pkgs.mkShell {
-          buildInputs = bi;
-          nativeBuildInputs = nbi;
-        };
       }
     );
+    */
+  };
 }
