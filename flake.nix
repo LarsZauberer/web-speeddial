@@ -15,20 +15,13 @@
         "x86_64-linux"
       ] (system: function nixpkgs.legacyPackages.${system});
   in {
-            packages = forAllSystems(
-                pkgs: {
-                    default = pkgs.callPackage ./package.nix {};
-                }
-            )
-    /*
-       flake-utils.lib.eachDefaultSystem (
-      system: let
-        pkgs = import nixpkgs {inherit system;};
+    packages = forAllSystems (
+      pkgs: let
+        package = pkgs.callPackage ./package.nix {};
       in {
-        packages.default = python_script;
-
+        default = package.defaultPackage;
+        devShell = package.defaultPackage;
       }
     );
-    */
   };
 }
